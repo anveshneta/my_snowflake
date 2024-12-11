@@ -60,6 +60,9 @@ This script reads a CSV file (`data/game_performance.csv`) and loads it into the
 
 ```
 |-- dbt_project.yml         # dbt project configuration file
+|--macros/
+   |-- custom_positive_check.sql        # Custom test for positive values
+   |-- custom_valid_date_format.sql     # Custom test for date validation
 |-- models/
 |   |-- sources.yml         # Source configuration for raw data
 |   |-- transformations/
@@ -67,8 +70,7 @@ This script reads a CSV file (`data/game_performance.csv`) and loads it into the
 |       |-- revenue_by_egm_and_venue.sql  # Model for aggregating revenue by EGM and venue
 |       |-- daily_summary.sql            # Model for creating a daily summary
 |-- tests/
-|   |-- custom_positive_check.sql        # Custom test for positive values
-|   |-- custom_valid_date_format.sql     # Custom test for date validation
+|   
 |-- scripts/
 |   |-- load_csv_to_postgres.py          # Python script for data ingestion
 |-- README.md              # Project documentation
@@ -264,6 +266,9 @@ repository/
 │
 ├── my_dbt_project/
 │   ├── dbt_project.yml                      # dbt project configuration
+    |--macros/
+       |-- custom_positive_check.sql        # Custom test for positive values
+       |-- custom_valid_date_format.sql     # Custom test for date validation
 │   ├── models/                              # dbt models directory
 │   │   ├── transformations/
 │   │   │   ├── daily_summary.sql            # Model for daily turnover and revenue summary
