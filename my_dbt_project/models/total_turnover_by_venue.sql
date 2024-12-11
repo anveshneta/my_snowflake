@@ -1,0 +1,6 @@
+-- models/total_turnover_by_venue.sql
+SELECT
+    VENUE_CODE,
+    SUM(TURNOVER_SUM) AS TOTAL_TURNOVER
+FROM {{ source('GAME_SCHEMA', 'GAME_PERFORMANCE_DATA') }}
+GROUP BY VENUE_CODE

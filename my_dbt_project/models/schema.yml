@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: total_turnover_by_venue
+    description: "Model to calculate total turnover by venue"
+    columns:
+      - name: VENUE_CODE
+        description: "Venue code"
+        tests:
+          - not_null
+      - name: TOTAL_TURNOVER
+        description: "Total turnover amount"
+        tests:
+          - not_null
+
+  - name: revenue_by_egm_and_venue
+    description: "Model to aggregate total revenue by EGM and venue"
+    columns:
+      - name: EGM_DESCRIPTION
+        description: "EGM description"
+        tests:
+          - not_null
+      - name: VENUE_CODE
+        description: "Venue code"
+        tests:
+          - not_null
+      - name: TOTAL_REVENUE
+        description: "Total revenue amount"
+        tests:
+          - not_null
+
+  - name: daily_summary
+    description: "Model to create daily turnover and revenue summary by venue"
+    columns:
+      - name: BUS_DATE
+        description: "The business date"
+        tests:
+          - not_null
+      - name: VENUE_CODE
+        description: "Venue code"
+        tests:
+          - not_null
+      - name: DAILY_TURNOVER
+        description: "Daily turnover amount"
+        tests:
+          - not_null
+      - name: DAILY_REVENUE
+        description: "Daily revenue amount"
+        tests:
+          - not_null
