@@ -1,0 +1,17 @@
+# Snowflake Snowpark
+snowflake-snowpark-python==1.5.1
+
+# Data manipulation and analysis
+pandas==1.5.3
+
+# dbt core
+dbt-core==1.9.0
+dbt-snowflake==1.9.0
+
+# Additional utilities
+python-dotenv==1.0.0
+
+# General dependencies
+requests==2.31.0
+
+# Optional: Add any additional dependencies based on your scripts

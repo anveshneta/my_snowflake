@@ -59,21 +59,36 @@ This script reads a CSV file (`data/game_performance.csv`) and loads it into the
 ## dbt Project Structure
 
 ```
-|-- dbt_project.yml         # dbt project configuration file
-|--macros/
-   |-- custom_positive_check.sql        # Custom test for positive values
-   |-- custom_valid_date_format.sql     # Custom test for date validation
-|-- models/
-|   |-- sources.yml         # Source configuration for raw data
-|   |-- transformations/
-|       |-- total_turnover_by_venue.sql  # Model for calculating total turnover by venue
-|       |-- revenue_by_egm_and_venue.sql  # Model for aggregating revenue by EGM and venue
-|       |-- daily_summary.sql            # Model for creating a daily summary
-|-- tests/
-|   
-|-- scripts/
-|   |-- load_csv_to_postgres.py          # Python script for data ingestion
-|-- README.md              # Project documentation
+repository/
+│
+├── data/
+│   ├── Data_Engineer_Challenge_input.csv    # Full load CSV file
+│   ├── incremental_data.csv                # Incremental load CSV file
+│
+├── scripts/
+│   ├── pipeline.py                         # Main pipeline script
+│   ├── load_csv_to_sflake.py               # Script for initial Snowflake ingestion
+│
+├── my_dbt_project/
+│   ├── dbt_project.yml                     # dbt project configuration file
+│   ├── macros/                             # Custom macros directory
+│   │   ├── custom_positive_check.sql       # Custom test for positive values
+│   │   └── custom_valid_date_format.sql    # Custom test for date format validation
+│   ├── models/                             # dbt models directory
+│   │   ├── game_performance_incremental.sql # Incremental model for GAME_PERFORMANCE_DATA
+│   │   ├── daily_summary.sql               # Model for daily turnover and revenue summary
+│   │   ├── revenue_by_egm_and_venue.sql    # Model for revenue aggregation by EGM and venue
+│   │   ├── total_turnover_by_venue.sql     # Model for total turnover aggregation by venue
+│   │   └── schema.yml                      # Source configuration and column-level tests
+│
+├── tests/
+│   ├── custom_positive_check.sql           # Custom test definition
+│   ├── custom_valid_date_format.sql        # Custom test definition
+│
+├── requirements.txt                        # Python dependencies for the project
+│
+└── README.md                               # Documentation for the project
+
 ```
 
 ---
@@ -125,6 +140,22 @@ Ensure all required dependencies are installed.
 - **Model**: `daily_summary.sql`
 - **Logic**: Creates a summary of daily turnover and revenue metrics for each `bus_date`.
 
+### 4. **Incremental dbt Model
+ **Model**: `game_performance_incremental.sql`
+The incremental dbt model is designed to handle new and updated records from an incremental data source and integrate them into the primary GAME_PERFORMANCE_DATA table. By using dbt’s incremental materialization, the model ensures efficient updates without reprocessing the entire dataset.
+
+Key Features
+## Incremental Logic:
+
+Loads only the new or updated records from the incremental data source into the target table.
+Avoids duplicating existing records by comparing the BUS_DATE.
+## Full Refresh Capability:
+
+During the first run or a full refresh, the model processes all the incremental data and loads it into the target table.
+## Date-Based Incremental Processing:
+
+Uses the BUS_DATE column to identify which rows are new or updated.
+
 ---
 
 ## Data Quality Checks
@@ -165,17 +196,37 @@ This repository contains a complete data pipeline to ingest, transform, and test
 ## **Pipeline Overview**
 
 ### **Steps**
-1. **Data Ingestion**:
-   - Load game performance data from a CSV file into Snowflake.
 
-2. **Data Transformation**:
-   - Use dbt models to calculate total turnover by venue, total revenue by EGM and venue, and a daily turnover and revenue summary.
+The pipeline.py script orchestrates the end-to-end data pipeline for the Game Performance Data project. It performs the following steps:
 
-3. **Data Quality Checks**:
-   - Ensure non-null values in key columns.
-   - Validate date formats for the `BUS_DATE` column.
-   - Ensure positive values for `TURNOVER_SUM` and `GAMES_PLAYED_SUM`.
+## Connect to Snowflake: 
+Establishes a connection to your Snowflake account using the snowflake.snowpark library. Ensures secure interaction with the Snowflake database for data ingestion and transformation.
 
+## Load Data into Snowflake: 
+Handles both full load and incremental load of game performance data from CSV files into Snowflake tables:
+
+## Full Load:
+Reads the CSV file (Data_Engineer_Challenge_input.csv) and loads it into the GAME_PERFORMANCE_DATA table.
+## Incremental Load:
+Reads the incremental CSV file (incremental_data.csv) and loads it into a staging table GAME_PERFORMANCE_INCREMENTAL.
+## Run dbt Models: 
+Executes dbt transformations by running models in a predefined sequence:
+
+game_performance_incremental.sql: Merges incremental data into the GAME_PERFORMANCE_DATA table.
+daily_summary.sql: Creates daily turnover and revenue summaries.
+total_turnover_by_venue.sql: Aggregates total turnover by venue.
+revenue_by_egm_and_venue.sql: Aggregates revenue by EGM and venue.
+## Run dbt Tests: 
+Validates data quality using dbt tests. This ensures:
+
+Non-null values in key columns.
+Valid date formats in the BUS_DATE column.
+Positive values for TURNOVER_SUM and GAMES_PLAYED_SUM.
+## Truncate Staging Table: 
+After processing the incremental data, the staging table GAME_PERFORMANCE_INCREMENTAL is truncated to prepare for the next incremental load.
+
+## Pipeline Completion: 
+Prints success messages after completing each step to confirm the pipeline execution.
 ---
 
 ## **Setup Instructions**
@@ -251,36 +302,6 @@ This repository contains a complete data pipeline to ingest, transform, and test
    - **Testing**:
      - Executes dbt tests to ensure data quality.
 
----
-
-## **Project Structure**
-
-```plaintext
-repository/
-│
-├── data/
-│   └── Data_Engineer_Challenge_input.csv    # Input CSV file
-│
-├── scripts/
-│   ├── pipeline.py                          # Main pipeline script
-│
-├── my_dbt_project/
-│   ├── dbt_project.yml                      # dbt project configuration
-    |--macros/
-       |-- custom_positive_check.sql        # Custom test for positive values
-       |-- custom_valid_date_format.sql     # Custom test for date validation
-│   ├── models/                              # dbt models directory
-│   │   ├── transformations/
-│   │   │   ├── daily_summary.sql            # Model for daily turnover and revenue summary
-│   │   │   ├── revenue_by_egm_and_venue.sql # Model for revenue aggregation
-│   │   │   ├── total_turnover_by_venue.sql  # Model for total turnover aggregation
-│   │   └── schema.yml                       # Column and source tests for data quality
-│   ├── tests/                               # Custom dbt test macros
-│
-└── requirements.txt                         # Python dependencies
-```
-
----
 
 ## **Data Transformations**
 

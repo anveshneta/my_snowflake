@@ -31,3 +31,31 @@ sources:
                   source_name: GAME_SCHEMA
                   table_name: GAME_PERFORMANCE_DATA
                   column_name: GAMES_PLAYED_SUM
+
+      - name: GAME_PERFORMANCE_INCREMENTAL
+        description: Staging table for incremental game performance data
+        columns:
+          - name: BUS_DATE
+            description: Business date
+            tests:
+              - not_null
+              - custom_valid_date_format:
+                  source_name: GAME_SCHEMA
+                  table_name: GAME_PERFORMANCE_INCREMENTAL
+                  column_name: BUS_DATE
+          - name: TURNOVER_SUM
+            description: Sum of turnover
+            tests:
+              - not_null
+              - custom_positive_check:
+                  source_name: GAME_SCHEMA
+                  table_name: GAME_PERFORMANCE_INCREMENTAL
+                  column_name: TURNOVER_SUM
+          - name: GAMES_PLAYED_SUM
+            description: Sum of games played
+            tests:
+              - not_null
+              - custom_positive_check:
+                  source_name: GAME_SCHEMA
+                  table_name: GAME_PERFORMANCE_INCREMENTAL
+                  column_name: GAMES_PLAYED_SUM
